@@ -1,0 +1,16 @@
+[package]
+name = "sub_processor"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+name = "sub_processor"
+crate-type = ["cdylib"]
+
+[dependencies]
+rayon = "1.8.0"
+
+pyo3="0.19.2"
+
+
