@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        target: [x86_64, x86, aarch64, armv7, s390x, ppc64le]
+        target: [x86_64, x86, aarch64, armv7]
                 
     steps:
       - uses: actions/checkout@v3
@@ -79,7 +79,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           command: sdist
-          args: --out dist -m ./sub_processor/Cargo.toml
+          args: --out dist
       - name: Upload sdist
         uses: actions/upload-artifact@v3
         with:
@@ -100,4 +100,4 @@ jobs:
           MATURIN_PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
         with:
           command: upload
-          args: -m ./sub_processor/Cargo.toml --non-interactive --skip-existing * 
+          args: --non-interactive --skip-existing *
