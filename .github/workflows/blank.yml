@@ -21,10 +21,6 @@ permissions:
 jobs:
   linux:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
-        working-directory: ./sub_processor
     strategy:
       matrix:
         target: [x86_64, x86, aarch64, armv7, s390x, ppc64le]
@@ -38,7 +34,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.target }}
-          args: --release --out dist --find-interpreter
+          args: --release --out dist --find-interpreter -m ./sub_processor/Cargo.toml
           sccache: 'true'
           manylinux: auto
       - name: Upload wheels
@@ -50,10 +46,7 @@ jobs:
 
   windows:
     runs-on: windows-latest
-    defaults:
-      run:
-        shell: bash
-        working-directory: ./sub_processor
+
     strategy:
       matrix:
         target: [x64, x86]
@@ -67,7 +60,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.target }}
-          args: --release --out dist --find-interpreter
+          args: --release --out dist --find-interpreter -m ./sub_processor/Cargo.toml
           sccache: 'true'
       - name: Upload wheels
         uses: actions/upload-artifact@v3
@@ -93,7 +86,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.target }}
-          args: --release --out dist --find-interpreter
+          args: --release --out dist --find-interpreter -m ./sub_processor/Cargo.toml
           sccache: 'true'
       - name: Upload wheels
         uses: actions/upload-artifact@v3
@@ -113,7 +106,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           command: sdist
-          args: --out dist
+          args: --out dist -m ./sub_processor/Cargo.toml
       - name: Upload sdist
         uses: actions/upload-artifact@v3
         with:
@@ -122,11 +115,6 @@ jobs:
 
   release:
     name: Release
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
-        working-directory: ./sub_processor
     if: "startsWith(github.ref, 'refs/tags/')"
     needs: [linux, windows, macos, sdist]
     steps:
@@ -139,4 +127,4 @@ jobs:
           MATURIN_PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
         with:
           command: upload
-          args: --non-interactive --skip-existing *
+          args: -m ./sub_processor/Cargo.toml --non-interactive --skip-existing * 

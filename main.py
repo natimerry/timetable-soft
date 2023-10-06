@@ -6,7 +6,7 @@ print(teacher)
 print(teacher.get_sub())
 print(teacher.name)
 
-school = sub_processor.School()
-school.add_teacher(teacher)
-del teacher
-print(school.teacher_by_subjects("physics"))
+# school = sub_processor.School()
+# school.add_teacher(teacher)
+# del teacher
+# print(school.teacher_by_subjects("physics"))
