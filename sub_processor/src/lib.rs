@@ -16,7 +16,7 @@ macro_rules! mod_add_func {
 /// make sure to add bindings to sub_processor/sub_processor.pyi
 /// to make sure type annotations work
 #[pymodule]
-fn sub_processor(_py: Python, module: &PyModule) -> PyResult<()> {
+fn substitution_gen_lib_rs(_py: Python, module: &PyModule) -> PyResult<()> {
     module.add_class::<teacher::Teacher>()?;
     module.add_class::<school::School>()?;
     module.add_class::<school::Class>()?;

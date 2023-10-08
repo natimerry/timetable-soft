@@ -13,13 +13,14 @@ enum Subjects {
 pub struct Teacher {
     #[pyo3(get)]
     pub name: String,
-    periods: Vec<(i64, (i64, char))>,
+    pub periods: Vec<(i16, (i16, char))>,
     sub: Subjects,
+    pub present: bool,
 }
 
 #[pymethods]
 impl Teacher {
-    pub fn add_period(&mut self, period: i64, grade: i64, section: char) -> PyResult<()> {
+    pub fn add_period(&mut self, period: i16, grade: i16, section: char) -> PyResult<()> {
         Ok(self.periods.push((period, (grade, section))))
     }
 
@@ -29,8 +30,8 @@ impl Teacher {
     }
 
     fn __str__(&self) -> String {
-        let mut periods_list: Vec<(i64, String)> = vec![];
-        self.periods.iter().for_each(|entry| {
+        let mut periods_list: Vec<(i16, String)> = vec![];
+        self.periods.iter().for_each(|entry: &(i16, (i16, char))| {
             periods_list.push((entry.0, format!("{}{}", entry.1 .0, entry.1 .1)));
         });
         format!(
@@ -46,7 +47,7 @@ impl Teacher {
 
     /// class constructor definition
     #[new]
-    pub fn __new__(name: &str, sub: &str) -> PyResult<Self> {
+    pub fn __new__(name: &str, sub: &str, present: bool) -> PyResult<Self> {
         let subject = match sub {
             "chemistry" => Subjects::Chemistry,
             "physics" => Subjects::Physics,
@@ -58,6 +59,15 @@ impl Teacher {
             name: name.to_string(),
             periods: vec![],
             sub: subject,
+            present,
         })
+    }
+
+    pub fn swap_periods(&mut self, period: i16, data: (i16, char)) {
+        for i in 0..self.periods.len() {
+            if self.periods[i].0 == period {
+                let _ = self.periods[i] == (period, (data));
+            }
+        }
     }
 }
