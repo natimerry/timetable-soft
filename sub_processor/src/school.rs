@@ -117,7 +117,7 @@ pub fn build_hashtable(school: &mut School) -> HashMap<String, Vec<Arc<Mutex<Tea
 impl School {
     pub fn generate_time_table(&mut self) -> PyResult<String>{
         let mut to_print = String::new();
-        Python::with_gil(|py|{
+        Python::with_gil(|_py|{
             let hashtable = build_hashtable(self);
             self.list_of_classes.iter().for_each(|class| {
                 let grade = str::parse::<i16>(&class.lock().unwrap().class_name[0..2]).unwrap();
@@ -128,15 +128,14 @@ impl School {
                         let teacher = period.0.clone();
                         if !teacher.lock().unwrap().present{
                             let period_num = period.1;
-                            let mut teacher_sub_list = hashtable.get(&teacher.lock().expect("Unable to lock mutex").get_sub()
+                            let teacher_sub_list = hashtable.get(&teacher.lock().expect("Unable to lock mutex").get_sub()
                                                                                                 .expect("Unable to get data"));
 
                             match teacher_sub_list{
-                                Some(t) => {
-                                    let teacher_sub_list = teacher_sub_list.unwrap();
+                                Some(teacher_vec) => {
                                     let mut found = false;
                                     // py.run("print(absent_teacher_found)", None, None);   
-                                    teacher_sub_list.iter().for_each(|new_teacher|{
+                                    teacher_vec.iter().for_each(|new_teacher|{
                                         if !new_teacher.lock().unwrap().periods.contains(&(period_num,(grade,section))){
                                             let _ = new_teacher.clone().lock().unwrap().add_period(period_num, grade, section);
                                             to_print.push_str(&format!("Switched {} to {} for {}\n", teacher.lock().unwrap().name.clone(),

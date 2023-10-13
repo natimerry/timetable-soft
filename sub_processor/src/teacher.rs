@@ -3,7 +3,6 @@ use std::collections::HashSet;
 use pyo3::exceptions::PyTypeError;
 use pyo3::prelude::*;
 
-use crate::school::{self, register_period};
 #[derive(Debug, Clone, Copy)]
 pub enum Subjects {
     Chemistry,
@@ -53,7 +52,7 @@ impl Teacher {
 
     /// class constructor definition
     #[new]
-    pub fn __new__(name: &str, sub: &str, present: bool,school:&mut school::School) -> PyResult<Self> {
+    pub fn __new__(name: &str, sub: &str, present: bool) -> PyResult<Self> {
         let subject = match sub {
             "chemistry" => Subjects::Chemistry,
             "physics" => Subjects::Physics,

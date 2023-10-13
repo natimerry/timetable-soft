@@ -1,7 +1,6 @@
 use pyo3::prelude::*;
 mod school;
 mod teacher;
-#[allow(unused_macros)]
 
 use school::register_period;
 
