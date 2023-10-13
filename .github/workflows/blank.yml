@@ -94,4 +94,4 @@ jobs:
           MATURIN_PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
         with:
           command: upload
-          args: --non-interactive --skip-existing sub_processor/target/wheels/*
+          args: --non-interactive --skip-existing *
