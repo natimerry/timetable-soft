@@ -66,6 +66,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bfa799dd5ed20a7e349f3b4639aa80d74549c81716d9ec4f994c9b5815598306"
 
 [[package]]
+name = "itertools"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b1c173a5686ce8bfa551b3563d0c2170bf24ca44da99c7ca4bfdab5418c3fe57"
+dependencies = [
+ "either",
+]
+
+[[package]]
 name = "libc"
 version = "0.2.148"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -242,6 +251,7 @@ checksum = "942b4a808e05215192e39f4ab80813e599068285906cc91aa64f923db842bd5a"
 name = "sub_processor"
 version = "0.1.2"
 dependencies = [
+ "itertools",
  "pyo3",
  "rayon",
 ]

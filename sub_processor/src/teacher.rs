@@ -1,7 +1,11 @@
+use std::collections::HashSet;
+
 use pyo3::exceptions::PyTypeError;
 use pyo3::prelude::*;
+
+use crate::school::{self, register_period};
 #[derive(Debug, Clone, Copy)]
-enum Subjects {
+pub enum Subjects {
     Chemistry,
     Physics,
     Maths,
@@ -13,15 +17,16 @@ enum Subjects {
 pub struct Teacher {
     #[pyo3(get)]
     pub name: String,
-    pub periods: Vec<(i16, (i16, char))>,
-    sub: Subjects,
+    pub periods: HashSet<(i16, (i16, char))>,
+    pub sub: Subjects,
     pub present: bool,
 }
 
 #[pymethods]
 impl Teacher {
     pub fn add_period(&mut self, period: i16, grade: i16, section: char) -> PyResult<()> {
-        Ok(self.periods.push((period, (grade, section))))
+        self.periods.insert((period, (grade, section)));
+        Ok(())
     }
 
     //TODO: will substitute with a getter trait later
@@ -30,10 +35,11 @@ impl Teacher {
     }
 
     fn __str__(&self) -> String {
-        let mut periods_list: Vec<(i16, String)> = vec![];
+        let mut periods_list: Vec<String> = vec![];
         self.periods.iter().for_each(|entry: &(i16, (i16, char))| {
-            periods_list.push((entry.0, format!("{}{}", entry.1 .0, entry.1 .1)));
+            periods_list.push(format!("{}:{}{}", entry.0, entry.1 .0, entry.1 .1));
         });
+
         format!(
             "Teacher:
     {{
@@ -47,7 +53,7 @@ impl Teacher {
 
     /// class constructor definition
     #[new]
-    pub fn __new__(name: &str, sub: &str, present: bool) -> PyResult<Self> {
+    pub fn __new__(name: &str, sub: &str, present: bool,school:&mut school::School) -> PyResult<Self> {
         let subject = match sub {
             "chemistry" => Subjects::Chemistry,
             "physics" => Subjects::Physics,
@@ -57,17 +63,10 @@ impl Teacher {
         };
         Ok(Teacher {
             name: name.to_string(),
-            periods: vec![],
+            periods: HashSet::new(),
             sub: subject,
             present,
         })
-    }
-
-    pub fn swap_periods(&mut self, period: i16, data: (i16, char)) {
-        for i in 0..self.periods.len() {
-            if self.periods[i].0 == period {
-                let _ = self.periods[i] == (period, (data));
-            }
-        }
+        
     }
 }
