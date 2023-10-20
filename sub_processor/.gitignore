@@ -10,7 +10,8 @@ __pycache__/
 
 # Distribution / packaging
 routines/
-output.*
+output.csv
+output.html
 .Python
 .venv/
 .venv_release/
