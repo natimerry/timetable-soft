@@ -9,6 +9,9 @@ pub enum Subjects {
     Physics,
     Maths,
     Computer,
+    English,
+    Biology,
+    PhysicalEdu
 }
 
 #[pyclass]
@@ -18,6 +21,7 @@ pub struct Teacher {
     pub name: String,
     pub periods: HashSet<(i16, (i16, char))>,
     pub sub: Subjects,
+    
     pub present: bool,
 }
 
@@ -45,8 +49,9 @@ impl Teacher {
         name:{} 
         periods: {:?} 
         subject: {:?}
+        present: {:?}
     }}\n",
-            self.name, periods_list, self.sub
+            self.name, periods_list, self.sub,self.present
         )
     }
 
@@ -58,6 +63,9 @@ impl Teacher {
             "physics" => Subjects::Physics,
             "maths" => Subjects::Maths,
             "computer" => Subjects::Computer,
+            "english" => Subjects::English,
+            "bio" => Subjects::Biology,
+            "P.E" => Subjects::PhysicalEdu,
             _ => return Err(PyErr::new::<PyTypeError, _>("Wrong subject")),
         };
         Ok(Teacher {

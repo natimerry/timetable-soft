@@ -9,6 +9,8 @@ __pycache__/
 *.so
 
 # Distribution / packaging
+routines/
+output.*
 .Python
 .venv/
 env/

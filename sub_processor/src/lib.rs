@@ -2,7 +2,7 @@ use pyo3::prelude::*;
 mod school;
 mod teacher;
 
-use school::register_period;
+use school::*;
 
 /// fucking autistic syntax to expose basic functions, so i use
 /// a macro to shorten it in case i need it
