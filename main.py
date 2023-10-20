@@ -4,7 +4,6 @@ import os
 import argparse
 from pathlib import Path
 import pandas as pd
-import pdfkit
 DIR = ""
 
 school = School()
