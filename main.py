@@ -29,7 +29,7 @@ def get_periods(day:str):
     path = Path(DIR+day)
     for cls in os.listdir(path):
         with open(Path(str(path)+'/'+cls)) as file:
-            cur_class = Class(cls[0:3])
+            cur_class = Class(cls.removesuffix(".csv"))
             class_data = csv.DictReader(file)
             for row in class_data:
                 register_period(list_of_teachers[row['teacher']],int(row['period']),school,cur_class)
@@ -47,9 +47,11 @@ if __name__ == "__main__":
     DIR = args.directory
     get_periods(args.day)
     with open("output.csv","w+") as output_csv:
-        output_csv.write(school.generate_time_table().split("\n\n")[0])
+        new_timetable = school.generate_time_table()
+        print(new_timetable)
+        output_csv.write(new_timetable.split("\n\n")[0])
     
-    df = pd.read_csv('output.csv')
-    html_table = df.to_html()
+    data_format = pd.read_csv('output.csv')
+    html_table = data_format.to_html()
     with open("output.html","w+") as html:
         html.write(html_table)

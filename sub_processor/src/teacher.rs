@@ -19,7 +19,7 @@ pub enum Subjects {
 pub struct Teacher {
     #[pyo3(get)]
     pub name: String,
-    pub periods: HashSet<(i16, (i16, char))>,
+    pub periods: HashSet<(i16, String)>,
     pub sub: Subjects,
     
     pub present: bool,
@@ -27,8 +27,8 @@ pub struct Teacher {
 
 #[pymethods]
 impl Teacher {
-    pub fn add_period(&mut self, period: i16, grade: i16, section: char) -> PyResult<()> {
-        self.periods.insert((period, (grade, section)));
+    pub fn add_period(&mut self, period: i16, grade: String) -> PyResult<()> {
+        self.periods.insert((period, grade));
         Ok(())
     }
 
@@ -39,8 +39,8 @@ impl Teacher {
 
     fn __str__(&self) -> String {
         let mut periods_list: Vec<String> = vec![];
-        self.periods.iter().for_each(|entry: &(i16, (i16, char))| {
-            periods_list.push(format!("{}:{}{}", entry.0, entry.1 .0, entry.1 .1));
+        self.periods.iter().for_each(|entry: &(i16, String)| {
+            periods_list.push(format!("{}:{}", entry.0, entry.1));
         });
 
         format!(
