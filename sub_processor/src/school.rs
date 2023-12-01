@@ -4,6 +4,8 @@ use std::collections::HashMap;
 
 use std::sync::Arc;
 use std::sync::Mutex;
+
+
 #[allow(clippy::new_without_default)]
 #[pyclass]
 #[derive(Debug, Clone)]
@@ -13,6 +15,7 @@ pub struct Class {
 }
 
 #[pyclass]
+#[derive(Default)]
 pub struct School {
     name_list_teacher: HashMap<String, Arc<Mutex<Teacher>>>,
     list_of_teachers: Vec<Arc<Mutex<Teacher>>>,
@@ -108,7 +111,6 @@ pub fn build_hashtable(school: &mut School) -> HashMap<String, Vec<Arc<Mutex<Tea
 
 #[pymethods]
 impl School {
-
     pub fn add_teacher(&mut self,teacher:&Teacher){
         match self.name_list_teacher.get(&teacher.name) {
             Some(_t) => {},
@@ -134,17 +136,19 @@ impl School {
                         let teacher = period.0.clone();
                         if !teacher.lock().unwrap().present{
                             let name = teacher.lock().unwrap().name.clone();
+
                             match subbed_map.get(&name) {
                                 Some(_) => {},
                                 None => {subbed_map.insert(name, false);}
                             }
+
                             let period_num = period.1;
                             let sub = teacher.lock().expect("Unable to lock mutex").get_sub().expect("Unable to get subject");
-                            let teacher_sub_list = hashtable.get(&sub);
+                            let mut teacher_sub_list = hashtable.get(&sub);
                             match teacher_sub_list{
-                                Some(teacher_vec) => {
-                                    // py.run("print(absent_teacher_found)", None, None);   
-                                    for new_teacher in teacher_vec{
+
+                                Some(teacher_from_sub) => {
+                                    for new_teacher in teacher_from_sub{
                                         let new_teacher_period = new_teacher.lock().unwrap().periods.iter().map(|period|{
                                             period.0
                                         }).collect::<Vec<i16>>();
@@ -161,7 +165,28 @@ impl School {
                                         }
                                     }
                                     if !(*subbed_map.get(&teacher.lock().unwrap().name).unwrap()){
-                                        failure_log.push_str(&format!("Couldnt find a substitution for {} at {}-{:?}\n",teacher.lock().unwrap().name,period_num,grade.clone()));
+                                        let mut found= false;
+                                        for new_teacher in &self.list_of_teachers{
+                                            let new_teacher_period = new_teacher.lock().unwrap().periods.iter().map(|period|{
+                                                period.0
+                                            }).collect::<Vec<i16>>();
+                                            if !new_teacher_period.contains(&period_num){
+                                                let _ = new_teacher.clone().lock().unwrap().add_period(period_num, grade.clone());
+                                                to_print.push_str(&format!("{},{},{},{},{}\n", 
+                                                                                        teacher.lock().unwrap().name.clone(),
+                                                                                        period_num,
+                                                                                        sub,
+                                                                                        new_teacher.lock().unwrap().name.clone(),
+                                                                                        grade.clone()));
+                                                subbed_map.insert(teacher.lock().unwrap().name.clone(), true);
+                                                found=true;
+                                                break;
+                                            }
+                                        }
+                                        if !found{
+                                            failure_log.push_str(&format!("Couldnt find a substitution for {} at {}-{:?}\n",
+                                                            teacher.lock().unwrap().name,period_num,grade.clone()));
+                                        }
                                     }
                                 },
                                 None => to_print.push_str(&format!("unable to operate on teacher {}\n",teacher.lock().unwrap().name)),
@@ -178,9 +203,7 @@ impl School {
     #[new]
     pub fn new() -> Self {
         School {
-            list_of_teachers: vec![],
-            list_of_classes: vec![],
-            name_list_teacher: HashMap::new(),
+            ..Self::default()
         }
     }
     pub fn add_class(&mut self, class: &Class) {
@@ -204,8 +227,6 @@ impl School {
             "List of teachers: {:#?}\nList of classes:{:#?}\nTeacher_hashtable {:?}",
             self.list_of_teachers, self.list_of_classes, hashtable
         )
-        // format!("{:?}", self.list_of_teachers)
-        // format!("{:?}",build_hashtable(self))
     }
 
     pub fn add_to_hashmap(&mut self, name: String, teacher: Teacher) {
