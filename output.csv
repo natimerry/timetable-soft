@@ -1,2 +1,12 @@
-Teacher,Period,Subject,Substitution,Classroom
-Dhrita Ma'am,1,Computer,Lisa Ma'am,11B
+Teacher,Period,Subject,Substitution,Classroom,Reason
+BioTeacher1,1,Biology,BioTeacher2,11C_bio,Planned Absense
+BioTeacher1,4,Biology,BioTeacher2,11C_bio,Planned Absense
+Sujata Ma'am,7,English,BioTeacher2,11C_bio,Planned Absense
+Tonoy Sir,1,Chemistry,Arijit Sir,11B,Planned Absense
+BioTeacher1,2,Biology,BioTeacher2,11B,Planned Absense
+Arnab (Tonty) Sir,3,Physics,Partha Sir,11B,Planned Absense
+Sujata Ma'am,4,English,Lisa Ma'am,11B,Planned Absense
+Sujata Ma'am,5,English,Lisa Ma'am,11B,Planned Absense
+Dhrita Ma'am,6,Computer,Anirban Sinha,11B,Planned Absense
+Dhrita Ma'am,7,Computer,Anirban Sinha,11B,Planned Absense
+Tonoy Sir,3,Chemistry,BioTeacher2,11A_cs,Planned Absense

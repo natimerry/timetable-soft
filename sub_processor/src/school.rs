@@ -1,9 +1,11 @@
+
 use crate::teacher::Teacher;
 use pyo3::prelude::*;
 use std::collections::HashMap;
 
 use std::sync::Arc;
 use std::sync::Mutex;
+use std::time::Instant;
 
 
 #[allow(clippy::new_without_default)]
@@ -57,38 +59,10 @@ pub fn register_period(
     Ok(())
     //                 }
 }
-// pub fn collect_teachers(school: &mut School){
-//     // let mut name_list: HashSet<String> = HashSet::new();
-//     Python::with_gil(|py|{
-//         py.allow_threads(move ||{
-//             for class in &school.list_of_classes {
-//                 let class_locked = class.lock().unwrap();
-//                 for i in 0..class_locked.list_of_periods.len() {
-//                     // let _ = py.run("print('period')", None, None); print to stdout
-//                     let teacher: &Arc<Mutex<Teacher>> = &class_locked.list_of_periods[i].0;
-//                     let periods = teacher.lock().unwrap().periods.clone().into_iter().next().unwrap(); // period for current iteration
-//                     let name = teacher.lock().unwrap().name.clone();
-
-//                     match school.name_list_teacher.get(&name) {
-//                         Some(teacher_in_hashmap) => {
-//                             teacher.clone().lock().unwrap().periods.insert(periods);
-//                             teacher_in_hashmap.clone().lock().unwrap().periods.insert(periods);
-//                         }
-//                         None => {
-//                             school.list_of_teachers.push(teacher.clone());
-//                             school.name_list_teacher.insert(name, teacher.clone());
-//                         }
-//                     }
-//                 }
-//             }
-//         });
-//     });
-
-// }
 
 pub fn build_hashtable(school: &mut School) -> HashMap<String, Vec<Arc<Mutex<Teacher>>>> {
     let mut hashtable: HashMap<String, Vec<Arc<Mutex<Teacher>>>> = HashMap::new();
-
+    
     school.list_of_teachers.iter().for_each(|teacher| {
         let sub = teacher.lock().unwrap().get_sub().unwrap();
         match hashtable.get_mut(&sub) {
@@ -108,7 +82,6 @@ pub fn build_hashtable(school: &mut School) -> HashMap<String, Vec<Arc<Mutex<Tea
 }
 
 
-
 #[pymethods]
 impl School {
     pub fn add_teacher(&mut self,teacher:&Teacher){
@@ -125,80 +98,99 @@ impl School {
     }
 
     pub fn generate_time_table(&mut self) -> PyResult<String>{
-        let mut to_print = String::from("Teacher,Period,Subject,Substitution,Classroom\n");
-        let mut failure_log = String::new();
-        Python::with_gil(|_py|{
-            let hashtable = build_hashtable(self);
-            self.list_of_classes.iter().for_each(|class| {
+        let to_print = Arc::new(Mutex::new(String::from("Teacher,Period,Subject,Substitution,Classroom,Reason\n")));
+        let failure_log = Arc::new(Mutex::new(String::new()));
+        let benchmark_logs = Arc::new(Mutex::new(String::new()));
+        Python::with_gil(|_py: Python<'_>|{
+            let start = Instant::now();
+            let hashtable: HashMap<String, Vec<Arc<Mutex<Teacher>>>> = build_hashtable(self);
+            self.list_of_classes.iter_mut().for_each(|class| {
                 let grade = class.lock().unwrap().class_name.clone();
-                let mut subbed_map:HashMap<String, bool> = HashMap::new();
-                class.lock().unwrap().list_of_periods.iter_mut().for_each(|period| {
+                let mut subbed_map:HashMap<String, (bool,i32)> = HashMap::new();
+                class.lock().unwrap().list_of_periods.iter_mut().for_each(|period: &mut (Arc<Mutex<Teacher>>, i16)| {
                         let teacher = period.0.clone();
                         if !teacher.lock().unwrap().present{
                             let name = teacher.lock().unwrap().name.clone();
 
                             match subbed_map.get(&name) {
                                 Some(_) => {},
-                                None => {subbed_map.insert(name, false);}
+                                None => {subbed_map.insert(name, (false,0));}
                             }
 
-                            let period_num = period.1;
+                            let period_num:i32 = period.1 as i32;
                             let sub = teacher.lock().expect("Unable to lock mutex").get_sub().expect("Unable to get subject");
-                            let mut teacher_sub_list = hashtable.get(&sub);
-                            match teacher_sub_list{
+                            let reason = teacher.lock().expect("Unable to lock mutex").reason_of_absentee.clone().expect("Unable to get subject");
 
-                                Some(teacher_from_sub) => {
-                                    for new_teacher in teacher_from_sub{
-                                        let new_teacher_period = new_teacher.lock().unwrap().periods.iter().map(|period|{
-                                            period.0
-                                        }).collect::<Vec<i16>>();
-                                        if !new_teacher_period.contains(&period_num){
-                                            let _ = new_teacher.clone().lock().unwrap().add_period(period_num, grade.clone());
-                                            to_print.push_str(&format!("{},{},{},{},{}\n", 
-                                                                                    teacher.lock().unwrap().name.clone(),
-                                                                                    period_num,
-                                                                                    sub,
-                                                                                    new_teacher.lock().unwrap().name.clone(),
-                                                                                    grade.clone()));
-                                            subbed_map.insert(teacher.lock().unwrap().name.clone(), true);
-                                            break;
-                                        }
+                            let teacher_sub_list: Option<&Vec<Arc<Mutex<Teacher>>>> = hashtable.get(&sub);
+
+                            let mut sorted_list: Vec<Arc<Mutex<Teacher>>> = teacher_sub_list.unwrap().clone();
+                            sorted_list.sort_by(|a: &Arc<Mutex<Teacher>>,b: &Arc<Mutex<Teacher>>|a.lock().unwrap().periods.len()
+                                                    .cmp(&b.lock().unwrap().periods.len()));
+
+                            // match teacher_sub_list{
+                                // Some(teacher_from_sub) => {
+                            for new_teacher in sorted_list{
+                                if subbed_map.get(&teacher.lock().unwrap().name).unwrap().1 == period_num{
+                                    continue;
+                                }
+                                let new_teacher_period = new_teacher.lock().unwrap().periods.iter().map(|period|{
+                                    period.0
+                                }).collect::<Vec<i16>>();
+                                if !new_teacher_period.contains(&period_num.try_into().unwrap()){
+                                    let _ = new_teacher.clone().lock().unwrap().add_period(period_num.try_into().unwrap(), grade.clone());
+                                    to_print.lock().unwrap().push_str(&format!("{},{},{},{},{},{}\n", 
+                                                                            teacher.lock().unwrap().name.clone(),
+                                                                            period_num,
+                                                                            sub,
+                                                                            new_teacher.lock().unwrap().name.clone(),
+                                                                            grade.clone(),reason));
+                                    subbed_map.insert(teacher.lock().unwrap().name.clone(), (true,period_num));
+                                    break;
+                                }
+                            }
+                            if !(subbed_map.get(&teacher.lock().unwrap().name).unwrap().0){
+                                let mut found: bool= false;
+                                for new_teacher in &self.list_of_teachers{
+                                    if !new_teacher.lock().unwrap().present{
+                                        continue;
+                                    } 
+                                    let new_teacher_period: Vec<i16> = new_teacher.lock().unwrap().periods.iter().map(|period|{
+                                        period.0
+                                    }).collect::<Vec<i16>>();
+                                    if !new_teacher_period.contains(&period_num.try_into().unwrap()){
+                                        let _ = new_teacher.clone().lock().unwrap().add_period(period_num.try_into().unwrap(), grade.clone());
+                                        to_print.lock().unwrap().push_str(&format!("{},{},{},{},{},{}\n", 
+                                                                                teacher.lock().unwrap().name.clone(),
+                                                                                period_num,
+                                                                                sub,
+                                                                                new_teacher.lock().unwrap().name.clone(),
+                                                                                grade.clone(),reason));
+                                        subbed_map.insert(teacher.lock().unwrap().name.clone(), (true,period_num));
+                                        found=true;
+                                        break;
                                     }
-                                    if !(*subbed_map.get(&teacher.lock().unwrap().name).unwrap()){
-                                        let mut found= false;
-                                        for new_teacher in &self.list_of_teachers{
-                                            let new_teacher_period = new_teacher.lock().unwrap().periods.iter().map(|period|{
-                                                period.0
-                                            }).collect::<Vec<i16>>();
-                                            if !new_teacher_period.contains(&period_num){
-                                                let _ = new_teacher.clone().lock().unwrap().add_period(period_num, grade.clone());
-                                                to_print.push_str(&format!("{},{},{},{},{}\n", 
-                                                                                        teacher.lock().unwrap().name.clone(),
-                                                                                        period_num,
-                                                                                        sub,
-                                                                                        new_teacher.lock().unwrap().name.clone(),
-                                                                                        grade.clone()));
-                                                subbed_map.insert(teacher.lock().unwrap().name.clone(), true);
-                                                found=true;
-                                                break;
-                                            }
-                                        }
-                                        if !found{
-                                            failure_log.push_str(&format!("Couldnt find a substitution for {} at {}-{:?}\n",
-                                                            teacher.lock().unwrap().name,period_num,grade.clone()));
-                                        }
-                                    }
-                                },
-                                None => to_print.push_str(&format!("unable to operate on teacher {}\n",teacher.lock().unwrap().name)),
+                                }
+                                if !found{
+                                    failure_log.lock().unwrap().push_str(&format!("Couldnt find a substitution for {} at {}-{:?}\n",
+                                                    teacher.lock().unwrap().name,period_num,grade.clone()));
+                                }
+                            }
+                                // },
+                                // None => to_print.push_str(&format!("unable to operate on teacher {}\n",teacher.lock().unwrap().name)),
 
                             }
 
-                        }
+                        // }
                         
                     });
             });
+            let duration = start.elapsed();
+            benchmark_logs.lock().unwrap().push_str(&format!("Time taken to generate subs: {:?}",duration));
         });
-        Ok(format!("{to_print}\n{failure_log}"))
+        let to_print = to_print.lock().unwrap().clone();
+        let benchmark_logs = benchmark_logs.lock().unwrap().clone();
+
+        Ok(format!("{to_print}\n{:?}\n{:?}",failure_log.lock(),benchmark_logs))
     }
     #[new]
     pub fn new() -> Self {
@@ -217,12 +209,10 @@ impl School {
                 .len()
                 .cmp(&b.lock().unwrap().periods.len())
         });
-        // collect_teachers(self);
-        // force_teachers(self);
     }
 
     fn __str__(&mut self) -> String {
-        let hashtable = build_hashtable(self);
+        let hashtable: HashMap<String, Vec<Arc<Mutex<Teacher>>>> = build_hashtable(self);
         format!(
             "List of teachers: {:#?}\nList of classes:{:#?}\nTeacher_hashtable {:?}",
             self.list_of_teachers, self.list_of_classes, hashtable
