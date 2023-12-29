@@ -3,8 +3,6 @@ use std::collections::HashSet;
 use pyo3::exceptions::PyTypeError;
 use pyo3::prelude::*;
 
-
-
 #[pyclass]
 #[derive(Clone, Debug)]
 pub struct Teacher {
@@ -42,7 +40,7 @@ impl Teacher {
         subject: {:?}
         present: {:?}
     }}\n",
-            self.name, periods_list, self.sub,self.present
+            self.name, periods_list, self.sub, self.present
         )
     }
 
@@ -64,9 +62,8 @@ impl Teacher {
             periods: HashSet::new(),
             sub: subject,
             present,
-            reason_of_absentee: Some("Planned Absense".to_string())
+            reason_of_absentee: Some("Planned Absense".to_string()),
         })
-        
     }
 }
 #[derive(Debug, Clone, Copy)]
@@ -77,5 +74,5 @@ pub enum Subjects {
     Computer,
     English,
     Biology,
-    PhysicalEdu
+    PhysicalEdu,
 }

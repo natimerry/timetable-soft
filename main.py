@@ -47,7 +47,7 @@ if __name__ == "__main__":
     DIR = args.directory
     get_periods(args.day)
     with open("output.csv","w+") as output_csv:
-        new_timetable = school.generate_time_table()
+        new_timetable = school.generate_substitutions()
         print(new_timetable)
         output_csv.write(new_timetable.split("\n\n")[0])
     

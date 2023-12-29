@@ -9,6 +9,5 @@ name = "substitution_gen_lib_rs"
 crate-type = ["cdylib"]
 
 [dependencies]
-rayon = "1.8.0"
 pyo3="0.20.0"
-# itertools = "0.11.0"
+parking_lot = "0.12.1"
