@@ -10,8 +10,10 @@ pub struct Teacher {
     pub name: String,
     pub periods: HashSet<(i16, String)>,
     pub sub: Subjects,
+    #[pyo3(get,set)]
     pub present: bool,
-    pub reason_of_absentee: Option<String>,
+    #[pyo3(get,set)]
+    pub reason_of_absentee: String,
 }
 
 #[pymethods]
@@ -55,14 +57,14 @@ impl Teacher {
             "english" => Subjects::English,
             "bio" => Subjects::Biology,
             "P.E" => Subjects::PhysicalEdu,
-            _ => return Err(PyErr::new::<PyTypeError, _>("Wrong subject")),
+            _ => return Err(PyErr::new::<PyTypeError, _>(format!("Wrong subject {sub}",))),
         };
         Ok(Teacher {
             name: name.to_string(),
             periods: HashSet::new(),
             sub: subject,
             present,
-            reason_of_absentee: Some("Planned Absense".to_string()),
+            reason_of_absentee: "Planned Absense".to_string(),
         })
     }
 }

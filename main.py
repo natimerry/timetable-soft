@@ -11,18 +11,27 @@ school = School()
 list_of_teachers = {}
 def read_teachers():
     global school,DIR,list_of_teachers
-
+    
     with open(Path(DIR+"teacher_list.csv")) as file:
           teacher_data = csv.DictReader(file)
 
           for lines in teacher_data:
-            teacher = Teacher(lines["teacher"],lines["subject"],
-                              lines["present"].lower() in ['true', '1', 't', 'y', 'yes', 'yeah', 'yup'])
+            teacher = Teacher(lines["teacher"],lines["subject"],True)
             
-            school.add_teacher(teacher)
             list_of_teachers[lines['teacher']] = teacher
+    
+    with open(Path(DIR+"absentee_list.csv")) as absentee_file:
+          teacher_data = csv.DictReader(absentee_file)
 
+          for lines in teacher_data:
+            name = lines['teacher']
+            reason = lines['reason']
+            list_of_teachers[name].reason_of_absentee = reason
+            list_of_teachers[name].present = False
 
+    for i in list_of_teachers.values():
+        school.add_teacher(i)
+    
 def get_periods(day:str):
     read_teachers()
     global DIR,list_of_teachers,school

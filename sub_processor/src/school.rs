@@ -125,14 +125,13 @@ impl School {
                             let reason = teacher
                                 .lock()
                                 .reason_of_absentee
-                                .clone()
-                                .expect("Unable to get subject");
+                                .clone();
+                                // .expect("Unable to get subject");
 
-                            let teacher_sub_list: Option<&Vec<Arc<Mutex<Teacher>>>> =
-                                hashtable.get(&sub);
+                            let teacher_sub_list: Option<&Vec<Arc<Mutex<Teacher>>>> = hashtable.get(&sub);
 
-                            let mut sorted_list: Vec<Arc<Mutex<Teacher>>> =
-                                teacher_sub_list.unwrap().to_vec();
+                            let mut sorted_list: Vec<Arc<Mutex<Teacher>>> = teacher_sub_list.unwrap().to_vec();
+
                             sorted_list.sort_by(
                                 |a: &Arc<Mutex<Teacher>>, b: &Arc<Mutex<Teacher>>| {
                                     a.lock().periods.len().cmp(&b.lock().periods.len())
@@ -140,11 +139,10 @@ impl School {
                             );
 
                             for new_teacher in sorted_list {
-                                if subbed_map.get(&teacher.lock().name).unwrap().1
-                                    == period_num.into()
-                                {
+                                if subbed_map.get(&teacher.lock().name).unwrap().1 == period_num.into() {
                                     continue;
                                 }
+
                                 let new_teacher_period = new_teacher
                                     .lock()
                                     .periods

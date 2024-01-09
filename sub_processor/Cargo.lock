@@ -188,7 +188,7 @@ checksum = "942b4a808e05215192e39f4ab80813e599068285906cc91aa64f923db842bd5a"
 
 [[package]]
 name = "sub_processor"
-version = "1.3.1"
+version = "1.3.2"
 dependencies = [
  "parking_lot",
  "pyo3",

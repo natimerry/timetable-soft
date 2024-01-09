@@ -1,10 +1,10 @@
 Teacher,Period,Subject,Substitution,Classroom,Reason
-BioTeacher1,1,Biology,Tamali Ma'am,11C_bio,Planned Absense
-Arijit Sir,3,Chemistry,Tamali Ma'am,11C_bio,Planned Absense
-Anirban Sinha,5,Computer,Dhrita Ma'am,11C_bio,Planned Absense
-Sujata Ma'am,7,English,Tamali Ma'am,11C_bio,Planned Absense
-BioTeacher1,2,Biology,Tamali Ma'am,11B,Planned Absense
-Arnab (Tonty) Sir,3,Physics,Partha Sir,11B,Planned Absense
-Sujata Ma'am,4,English,Lisa Ma'am,11B,Planned Absense
-Sujata Ma'am,5,English,Lisa Ma'am,11B,Planned Absense
-Arijit Sir,6,Chemistry,Tonoy Sir,11A_cs,Planned Absense
+Arijit Sir,3,Chemistry,BioTeacher2,11C_bio,Planned Leave
+Sujata Ma'am,7,English,BioTeacher2,11C_bio,On duty
+Tonoy Sir,1,Chemistry,BioTeacher2,11B,Planned Leave
+Sujata Ma'am,4,English,Lisa Ma'am,11B,On duty
+Sujata Ma'am,5,English,Lisa Ma'am,11B,On duty
+Tonoy Sir,3,Chemistry,Anirban Sinha,11A_cs,Planned Leave
+Tamali Ma'am,4,Computer,Anirban Sinha,11A_cs,Fever
+Tamali Ma'am,5,Computer,Dhrita Ma'am,11A_cs,Fever
+Arijit Sir,6,Chemistry,BioTeacher2,11A_cs,Planned Leave

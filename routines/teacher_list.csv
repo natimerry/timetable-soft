@@ -1,13 +1,13 @@
-teacher,subject,present
-Tamali Ma'am,computer,true
-Anirban Sinha,computer,false
-Dhrita Ma'am,computer,true
-Sujata Ma'am,english,false
-Lisa Ma'am,english,true
-Arnab (Tonty) Sir,physics,false
-Partha Sir,physics,true
-Tonoy Sir,chemistry,true
-Arijit Sir,chemistry,false
-BioTeacher1,bio,false 
-BioTeacher2,bio,false
+teacher,subject
+Tamali Ma'am,computer
+Anirban Sinha,computer
+Dhrita Ma'am,computer
+Sujata Ma'am,english
+Lisa Ma'am,english
+Arnab (Tonty) Sir,physics
+Partha Sir,physics
+Tonoy Sir,chemistry
+Arijit Sir,chemistry
+BioTeacher1,bio
+BioTeacher2,bio
 
