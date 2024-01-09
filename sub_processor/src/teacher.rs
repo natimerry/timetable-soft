@@ -49,14 +49,29 @@ impl Teacher {
     /// class constructor definition
     #[new]
     pub fn __new__(name: &str, sub: &str, present: bool) -> PyResult<Self> {
-        let subject = match sub {
+        let sub = sub.to_lowercase();
+        let subject = match sub.as_str() {
             "chemistry" => Subjects::Chemistry,
             "physics" => Subjects::Physics,
             "maths" => Subjects::Maths,
             "computer" => Subjects::Computer,
             "english" => Subjects::English,
             "bio" => Subjects::Biology,
+            "biology" => Subjects::Biology,
             "P.E" => Subjects::PhysicalEdu,
+            "sanskrit" => Subjects::Sanskrit,
+            "urdu" => Subjects::Urdu,
+            "geography" => Subjects::Geo,
+            "accountancy" => Subjects::Acc,
+            "history" => Subjects::History,
+            "civics" => Subjects::Civics,
+            "business" => Subjects::Business,
+            "art" => Subjects::Arts,
+            "games" => Subjects::Games,
+            "economics" => Subjects::Economics,
+            "hindi" => Subjects::Hindi,
+            "bengali" => Subjects::Bengali,
+            "finfance" => Subjects::Finance,
             _ => return Err(PyErr::new::<PyTypeError, _>(format!("Wrong subject {sub}",))),
         };
         Ok(Teacher {
@@ -77,4 +92,17 @@ pub enum Subjects {
     English,
     Biology,
     PhysicalEdu,
+    Sanskrit,
+    Urdu,
+    Geo,
+    Acc,
+    History,
+    Civics,
+    Business,
+    Arts,
+    Games,
+    Economics,
+    Hindi,
+    Bengali,
+    Finance
 }
